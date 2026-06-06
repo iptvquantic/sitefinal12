@@ -223,7 +223,7 @@ tbody tr:hover td{background:rgba(0,232,122,.04)}
 
 /* ══ SIDEBAR LAYOUT ══ */
 body{display:flex;flex-direction:column}
-#appWrap{display:flex;flex:1;min-height:0}
+#appWrap{display:flex;flex:1}
 #sidebar{
   width:210px;flex-shrink:0;
   background:var(--bg2);border-right:1px solid var(--b1);
@@ -242,7 +242,7 @@ body{display:flex;flex-direction:column}
 .sb-btn:hover{color:var(--text);background:var(--bg3);border-color:var(--b1)}
 .sb-btn.on{color:var(--G);background:rgba(0,232,122,.08);border-color:rgba(0,232,122,.15);font-weight:700}
 .sb-btn.on i{color:var(--G)}
-#mainContent{flex:1;min-width:0;overflow-x:hidden}
+#mainContent{flex:1;min-width:0;overflow-x:hidden;min-height:calc(100vh - 80px)}
 main{padding:12px 14px;max-width:1920px;margin:0 auto;position:relative;z-index:1}
 /* hide old header nav */
 header nav#mainNav{display:none!important}
@@ -257,9 +257,12 @@ header nav#mainNav{display:none!important}
 /* sidebar collapse */
 #sidebar{transition:width .22s,min-width .22s}
 #sidebar.collapsed{width:52px!important;min-width:52px!important;overflow:hidden}
-#sidebar.collapsed .logo-nm,#sidebar.collapsed .sb-sec{display:none}
+#sidebar.collapsed .logo-nm,#sidebar.collapsed .sb-sec,#sidebar.collapsed .sb-sect{display:none}
 #sidebar.collapsed .nb{justify-content:center;padding:11px 0;font-size:0;gap:0}
 #sidebar.collapsed .nb i{font-size:17px!important;margin:0!important}
+#sidebar.collapsed .sb-btn{justify-content:center;padding:10px 0;gap:0;font-size:0}
+#sidebar.collapsed .sb-btn i{font-size:17px!important;margin:0!important}
+#sidebar.collapsed .sb-btn span{display:none}
 #sbTogBtn{background:none;border:1px solid var(--b2);border-radius:7px;width:30px;height:30px;
   cursor:pointer;color:var(--muted);font-size:13px;display:flex;align-items:center;
   justify-content:center;margin-left:auto;flex-shrink:0;transition:all .2s}
@@ -3109,6 +3112,8 @@ function updateWarBtcPrice() {
 
 // ── INIT ──
 async function init() {
+  // Resetar estado do sidebar para sempre começar expandido
+  try { localStorage.removeItem('_sbC'); } catch(e){}
   injectIcons();
   fetchBRL();
   // Run all data fetches in parallel for speed
@@ -3166,7 +3171,7 @@ function toggleSB() {
   try { localStorage.setItem('_sbC', _sbCollapsed ? '1' : '0'); } catch(e){}
 }
 (function(){
-  try { if(localStorage.getItem('_sbC')==='1') { _sbCollapsed=true; var sb=document.getElementById('sidebar'); if(sb)sb.classList.add('collapsed'); var ic=document.getElementById('sbIco'); if(ic)ic.className='fa-solid fa-chevron-right'; } }catch(e){}
+  // sidebar sempre começa expandido
 })();
 
 // ── Ticker row 2 (markets) ──
