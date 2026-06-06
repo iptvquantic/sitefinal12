@@ -2,14 +2,14 @@
 <html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Center Hub — Mercados ao Vivo</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23f7931a'/><text x='16' y='22' text-anchor='middle' font-size='20' font-weight='bold' font-family='Arial' fill='white'>&#x20BF;</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous"></script>
 <style>
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#020f08;--bg2:#061510;--bg3:#0e2318;--card:#122a1c;--card2:#163222;
@@ -28,9 +28,9 @@
   --text:#c8d8e8;--muted:#608090;--dim:#2a3a50;
   --B:#40b8d0;--G:#22d870;--R:#e83050;--Y:#c0a010;
 }
-html{font-size:17px;scroll-behavior:smooth;scroll-padding-top:108px}
+html{font-size:17px;scroll-behavior:smooth}
 body{font-family:"Inter",system-ui,sans-serif;background:var(--bg);color:var(--text);
-  -webkit-font-smoothing:antialiased;min-height:100vh}
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse 180% 60% at 50% -10%,rgba(0,232,122,.07),transparent 55%),
              radial-gradient(ellipse 60% 50% at 94% 88%,rgba(0,180,80,.04),transparent 50%)}
@@ -41,17 +41,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   border-bottom:1px solid var(--b2);overflow:hidden;display:flex;align-items:center}
 .tkw{display:flex;animation:tk 65s linear infinite;white-space:nowrap;will-change:transform}
 #ticker:hover .tkw{animation-play-state:paused}
-#ticker2:hover .tkw{animation-play-state:paused}
 @keyframes tk{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.tki{display:inline-flex;align-items:center;gap:4px;padding:0 10px;height:30px;
-  border-right:1px solid var(--b1);font-size:12px;cursor:pointer;transition:background .15s;line-height:1}
-.tki img{width:14px;height:14px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.tki{display:inline-flex;align-items:center;gap:4px;padding:0 12px;height:30px;
+  border-right:1px solid var(--b1);font-size:12px;cursor:pointer;transition:background .15s}
 .tki:hover{background:var(--bg3)}
 .tki img{width:14px;height:14px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,.1)}
-.tks{color:rgba(200,220,210,.6);font-weight:700;font-size:11.5px;letter-spacing:.2px}
-.tkp{font-weight:700;color:#e8fff3;font-size:12px}
-.up{color:#3fb950}.dn{color:#f85149}.nu{color:var(--muted)}
-header{position:sticky;top:58px;z-index:600;height:50px;padding:0 14px;
+.tks{color:var(--muted);font-weight:800;font-size:13px;letter-spacing:.2px}
+.tkp{font-weight:600}.up{color:var(--G)}.dn{color:var(--R)}.nu{color:var(--muted)}
+header{position:sticky;top:30px;z-index:600;height:50px;padding:0 14px;
   background:rgba(3,16,10,.98);backdrop-filter:blur(20px) saturate(1.8);
   border-bottom:1px solid var(--b2);
   display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -95,7 +92,7 @@ nav::-webkit-scrollbar{display:none}
 .mob-close{position:absolute;right:10px;top:10px;background:none;border:none;color:var(--muted);font-size:17px;cursor:pointer}
 .mob-pan .nb{justify-content:flex-start;font-size:13px;padding:9px 12px;width:100%}
 main{padding:12px 14px;max-width:1920px;margin:0 auto;position:relative;z-index:1}
-
+.page{display:none}.page.on{display:block}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -224,11 +221,19 @@ tbody tr:hover td{background:rgba(0,232,122,.04)}
 }
 @media(max-width:420px){.mc-px{font-size:19px}}
 
-#sidebar.collapsed .sb-label,
-#sidebar.collapsed .sb-sect,
-#sidebar.collapsed .theme-sw{display:none!important}
-.sb-sect{font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.9px;padding:10px 4px 3px;pointer-events:none}
+/* ══ SIDEBAR LAYOUT ══ */
+body{display:flex;flex-direction:column}
+#appWrap{display:flex;flex:1;min-height:0}
+#sidebar{
+  width:210px;flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;gap:2px;padding:10px 8px;
+  overflow-y:auto;scrollbar-width:none;position:sticky;top:80px;
+  height:calc(100vh - 80px);
+}
+#sidebar::-webkit-scrollbar{display:none}
+.sb-sect{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:#4aaa80;padding:10px 8px 4px;margin-top:4px}
 .sb-btn{background:none;border:1px solid transparent;color:var(--muted);
   font-family:"Inter",sans-serif;font-size:15px;font-weight:700;
   padding:9px 12px;border-radius:8px;cursor:pointer;width:100%;
@@ -237,129 +242,45 @@ tbody tr:hover td{background:rgba(0,232,122,.04)}
 .sb-btn:hover{color:var(--text);background:var(--bg3);border-color:var(--b1)}
 .sb-btn.on{color:var(--G);background:rgba(0,232,122,.08);border-color:rgba(0,232,122,.15);font-weight:700}
 .sb-btn.on i{color:var(--G)}
-#sidebar.collapsed .sb-btn{justify-content:center;padding:10px 0;gap:0;border-color:transparent}
-#sidebar.collapsed .sb-btn span{display:none}
-#sidebar.collapsed .sb-btn i{font-size:16px!important;width:auto!important;margin:0!important}
-#sidebar.collapsed .sb-btn.on{background:rgba(0,232,122,.12)}
-#sidebar.collapsed #sbTogBtn{width:100%;border-radius:0;border:none;border-bottom:1px solid var(--b1);height:36px;margin:0}
-
-
-
-
-
-
-
-
-
-
-
-
-#sidebar.collapsed { width: 48px !important; min-width: 48px !important; }
-
-
-
-/* ══ LAYOUT FINAL - baseado no teste que funciona ══ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: "Inter", system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
+#mainContent{flex:1;min-width:0;overflow-x:hidden}
+main{padding:12px 14px;max-width:1920px;margin:0 auto;position:relative;z-index:1}
+/* hide old header nav */
+header nav#mainNav{display:none!important}
+.mbtn{display:none}
+@media(max-width:900px){
+  #sidebar{display:none}
+  .mbtn{display:flex!important}
+  header nav#mainNav{display:none!important}
 }
 
-#ticker {
-  position: sticky;
-  top: 0;
-  height: 30px;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--b2);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  z-index: 700;
-}
 
-#ticker2 {
-  position: sticky;
-  top: 30px;
-  height: 28px;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--b1);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  z-index: 690;
-}
-
-header {
-  position: sticky;
-  top: 58px;
-  height: 50px;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--b1);
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  z-index: 600;
-}
-
-#appWrap {
-  display: flex;
-  min-height: calc(100vh - 108px);
-}
-
-#sidebar {
-  width: 210px;
-  min-width: 210px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 108px;
-  height: calc(100vh - 108px);
-  align-self: flex-start;
-  background: var(--bg2);
-  border-right: 1px solid var(--b1);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 8px 20px;
-  overflow-y: auto;
-  z-index: 400;
-  transition: width .2s ease, min-width .2s ease;
-}
-#sidebar::-webkit-scrollbar { width: 0; }
-
-#sidebar.collapsed {
-  width: 48px !important;
-  min-width: 48px !important;
-}
-
-#mainContent {
-  flex: 1;
-  min-width: 0;
-  min-height: calc(100vh - 108px);
-}
-
-main {
-  padding: 12px 14px;
-  max-width: 1920px;
-  margin: 0 auto;
-}
-
-.page { display: none !important; }
-.page.on { display: block !important; }
-
+/* sidebar collapse */
+#sidebar{transition:width .22s,min-width .22s}
+#sidebar.collapsed{width:52px!important;min-width:52px!important;overflow:hidden}
+#sidebar.collapsed .logo-nm,#sidebar.collapsed .sb-sec{display:none}
+#sidebar.collapsed .nb{justify-content:center;padding:11px 0;font-size:0;gap:0}
+#sidebar.collapsed .nb i{font-size:17px!important;margin:0!important}
+#sbTogBtn{background:none;border:1px solid var(--b2);border-radius:7px;width:30px;height:30px;
+  cursor:pointer;color:var(--muted);font-size:13px;display:flex;align-items:center;
+  justify-content:center;margin-left:auto;flex-shrink:0;transition:all .2s}
+#sbTogBtn:hover{color:var(--text);border-color:var(--G)}
 </style>
 </head>
 <body>
-<div id="ticker"><div class="tkw" id="tkW"><div class="tki" style="background:rgba(63,185,80,.12);border-right:2px solid rgba(63,185,80,.4)"><span style="font-size:10px;font-weight:900;color:#3fb950;letter-spacing:1.2px;text-transform:uppercase;padding:0 2px">CRYPTO</span></div>
-<div id="ticker2" style="height:28px;position:sticky;top:30px;z-index:690;background:var(--bg2);border-bottom:1px solid var(--b1);overflow:hidden;display:flex;align-items:center" onmouseenter="document.getElementById('tkW2').style.animationPlayState='paused'" onmouseleave="document.getElementById('tkW2').style.animationPlayState='running'"><div class="tkw" id="tkW2" style="animation-duration:80s"><div class="tki" style="background:rgba(88,166,255,.12);border-right:2px solid rgba(88,166,255,.4)"><span style="font-size:10px;font-weight:900;color:#58a6ff;letter-spacing:1.2px;text-transform:uppercase;padding:0 2px">GERAL</span></div>
+<!-- PLACEHOLDER: icons injected by Python -->
+<div id="ICON_DATA" style="display:none"></div>
+
+<!-- TICKER -->
+<div id="ticker"><div class="tkw" id="tkW"><div class="tki" style="background:rgba(63,185,80,.12);border-right:2px solid rgba(63,185,80,.4);padding:0 8px"><span style="font-size:10px;font-weight:900;color:#3fb950;letter-spacing:1px">LIVE</span></div></div></div>
+<!-- HEADER -->
 <header>
 <a class="logo" href="#">
   <div class="logo-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.548v-.002zm-6.35-4.613c.24-1.59-.974-2.45-2.64-3.03l.54-2.153-1.315-.33-.525 2.107c-.345-.087-.705-.167-1.064-.25l.526-2.127-1.32-.33-.54 2.165c-.285-.067-.565-.132-.84-.2l-1.815-.45-.35 1.407s.975.225.955.236c.535.136.63.486.615.766l-1.477 5.92c-.075.166-.24.406-.614.314.015.02-.96-.24-.96-.24l-.66 1.51 1.71.426.93.242-.54 2.19 1.32.327.54-2.17c.36.1.705.19 1.05.273l-.51 2.154 1.32.33.545-2.19c2.24.427 3.93.257 4.64-1.774.57-1.637-.03-2.58-1.217-3.196.854-.193 1.5-.76 1.68-1.93h.01zm-3.01 4.22c-.404 1.64-3.157.75-4.05.53l.72-2.9c.896.23 3.757.67 3.33 2.37zm.41-4.24c-.37 1.49-2.662.735-3.405.55l.654-2.64c.744.18 3.137.524 2.75 2.084v.006z" fill="#F7931A"/></svg></div>
   <div class="logo-nm">CENTER <span>HUB</span></div>
 </a>
-
+<div style="display:flex;align-items:center;padding:5px 5px 1px">
+  <button id="sbTogBtn" onclick="toggleSB()" title="Recolher menu"><i class="fa-solid fa-bars" id="sbIco"></i></button>
+</div>
 <nav id="mainNav">
   <div class="sb-sec" style="font-size:9px;font-weight:800;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:8px 8px 3px;opacity:.7">PRINCIPAL</div>
   <button class="nb on" onclick="goPage('dash',this)"><i class="fa-solid fa-chart-pie"></i>Dashboard</button>
@@ -389,28 +310,49 @@ main {
   <button class="mbtn" onclick="document.getElementById('mobOv').style.display='block'"><i class="fa-solid fa-bars"></i></button>
 </div>
 </header>
+
+<!-- MOBILE MENU -->
+<div class="mob-ov" id="mobOv" onclick="if(event.target===this)this.style.display='none'">
+<div class="mob-pan">
+  <button class="mob-close" onclick="document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+  <div style="font-size:13px;font-weight:900;padding:5px 0 11px;color:var(--B)">Center Hub</div>
+  <button class="nb on" onclick="goPage('dash',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-chart-pie"></i>Dashboard</button>
+  <button class="nb" onclick="goPage('chart',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-chart-candlestick"></i>Gráfico BTC</button>
+  <button class="nb" onclick="goPage('markets',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-globe"></i>Mercados</button>
+  <button class="nb" onclick="goPage('news',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-newspaper"></i>Notícias</button>
+  <button class="nb" onclick="goPage('whales',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-water"></i>Baleias</button>
+  <button class="nb" onclick="goPage('etf',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-building-columns"></i>ETF Flows</button>
+  <button class="nb" onclick="goPage('poly',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-dice"></i>Polymarket</button>
+  <button class="nb" onclick="goPage('macro',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-calendar-days"></i>Macro</button>
+  <button class="nb" onclick="goPage('war',this);document.getElementById('mobOv').style.display='none'"><i class="fa-solid fa-crosshairs"></i>Guerra</button>
+  <div style="height:1px;background:var(--b1);margin:10px 0"></div>
+  <div class="theme-sw" style="margin-top:4px">
+    <button class="ts on" onclick="setTheme('dark',this)">⚡</button>
+    <button class="ts" onclick="setTheme('light',this)">☀️</button>
+    <button class="ts" onclick="setTheme('gray',this)">⬜</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
 <div id="appWrap">
 <aside id="sidebar">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 4px 10px;border-bottom:1px solid var(--b1);margin-bottom:4px">
-    <div class="sb-label" style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Menu</div>
-    <button id="sbTogBtn" onclick="toggleSB()" title="Recolher menu" style="background:none;border:1px solid var(--b2);border-radius:6px;width:26px;height:26px;cursor:pointer;color:var(--muted);font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s" onmouseover="this.style.borderColor='var(--G)';this.style.color='var(--G)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--muted)'"><i class="fa-solid fa-angles-left" id="sbIco"></i></button>
+  <div style="padding:8px 4px 12px;border-bottom:1px solid var(--b1);margin-bottom:4px">
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Menu</div>
   </div>
   <div class="sb-sect">Principal</div>
-  <button class="sb-btn on" title="Dashboard" onclick="goPage('dash',this)"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></button>
-  <button class="sb-btn" title="Gráfico BTC" onclick="goPage('chart',this)"><i class="fa-solid fa-chart-candlestick"></i><span>Gráfico BTC</span></button>
-  <button class="sb-btn" title="Índices & Câmbio" onclick="goPage('markets',this)"><i class="fa-solid fa-globe"></i><span>Índices & Câmbio</span></button>
-  <button class="sb-btn" title="Top 100 Ativos" onclick="goPage('top100',this)"><i class="fa-solid fa-trophy"></i><span>Top 100 Ativos</span></button>
+  <button class="sb-btn on" onclick="goPage('dash',this)"><i class="fa-solid fa-chart-pie"></i>Dashboard</button>
+  <button class="sb-btn" onclick="goPage('chart',this)"><i class="fa-solid fa-chart-candlestick"></i>Gráfico BTC</button>
+  <button class="sb-btn" onclick="goPage('markets',this)"><i class="fa-solid fa-globe"></i>Mercados</button>
   <div class="sb-sect">Dados</div>
-  <button class="sb-btn" title="Notícias" onclick="goPage('news',this)"><i class="fa-solid fa-newspaper"></i><span>Notícias</span></button>
-  <button class="sb-btn" title="Baleias" onclick="goPage('whales',this)"><i class="fa-solid fa-water"></i><span>Baleias</span></button>
-  <button class="sb-btn" title="ETF Flows" onclick="goPage('etf',this)"><i class="fa-solid fa-building-columns"></i><span>ETF Flows</span></button>
-  <button class="sb-btn" title="Polymarket" onclick="goPage('poly',this)"><i class="fa-solid fa-dice"></i><span>Polymarket</span></button>
+  <button class="sb-btn" onclick="goPage('news',this)"><i class="fa-solid fa-newspaper"></i>Notícias</button>
+  <button class="sb-btn" onclick="goPage('whales',this)"><i class="fa-solid fa-water"></i>Baleias</button>
+  <button class="sb-btn" onclick="goPage('etf',this)"><i class="fa-solid fa-building-columns"></i>ETF Flows</button>
+  <button class="sb-btn" onclick="goPage('poly',this)"><i class="fa-solid fa-dice"></i>Polymarket</button>
   <div class="sb-sect">Análise</div>
-  <button class="sb-btn" title="IA Notícias" onclick="goPage('ainews',this)"><i class="fa-solid fa-robot"></i><span>IA Notícias</span></button>
-  <button class="sb-btn" title="On-Chain BTC" onclick="goPage('onchain',this)"><i class="fa-solid fa-link"></i><span>On-Chain BTC</span></button>
-  <button class="sb-btn" title="Macro" onclick="goPage('macro',this)"><i class="fa-solid fa-calendar-days"></i><span>Macro</span></button>
-  <button class="sb-btn" title="Guerra" onclick="goPage('war',this)"><i class="fa-solid fa-crosshairs"></i><span>Guerra</span></button>
-  <button class="sb-btn" title="Notícias Guerra" onclick="goPage('warnews',this)" style="color:#f85149"><i class="fa-solid fa-bolt"></i><span>Notícias Guerra</span></button>
+  <button class="sb-btn" onclick="goPage('ainews',this)"><i class="fa-solid fa-robot"></i>IA Notícias</button>
+  <button class="sb-btn" onclick="goPage('macro',this)"><i class="fa-solid fa-calendar-days"></i>Macro</button>
+  <button class="sb-btn" onclick="goPage('war',this)"><i class="fa-solid fa-crosshairs"></i>Guerra</button>
   <div style="flex:1"></div>
   <div style="padding:10px 4px;border-top:1px solid var(--b1);margin-top:8px">
     <div class="theme-sw" style="flex-direction:column;gap:2px;background:none;border:none;padding:0">
@@ -421,6 +363,7 @@ main {
   </div>
 </aside>
 <div id="mainContent">
+
 <main>
 
 <!-- ══════════ DASHBOARD ══════════ -->
@@ -708,7 +651,7 @@ main {
 
 <div class="g2 mb">
   <!-- M2 LIQUIDITY -->
-  <div class="card" style="min-width:0">
+  <div class="card">
     <div class="sec"><i class="fa-solid fa-droplet"></i>Liquidez Global M2 Estimada</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
       <div style="flex:1;min-width:170px">
@@ -724,9 +667,8 @@ main {
       <canvas id="liqC" width="130" height="130" style="flex-shrink:0"></canvas>
     </div>
   </div>
-</div><!-- /g2 -->
-<!-- RSI FULL WIDTH -->
-<div class="card mb">
+  <!-- RSI MULTI-TIMEFRAME -->
+  <div class="card">
     <div class="sec-row" style="margin-bottom:10px">
       <div class="sec"><i class="fa-solid fa-chart-line"></i>RSI(14) BTC — Tempo Real</div>
       <div class="live-pill"><div class="ld"></div>BINANCE</div>
@@ -787,7 +729,9 @@ main {
       <span class="badge bneu" style="font-size:13px">▬ Neutro 30–70</span>
       <span style="font-size:12px;color:var(--muted);margin-left:auto" id="rsiLastUpdate"></span>
     </div>
-</div><!-- /RSI card -->
+  </div>
+</div>
+</div>
 
 <!-- ══════════ MERCADOS ══════════ -->
 <div class="page" id="page-markets">
@@ -1331,8 +1275,8 @@ main {
 </div>
 </div>
 </main>
-</div><!-- mainContent -->
-</div><!-- appWrap -->
+
+<!-- SUMMARY PANEL -->
 <div id="sumP">
   <div class="sp-hdr">
     <div class="sp-title"><i class="fa-solid fa-microphone-lines"></i>Resumo IA — Mercado</div>
@@ -1413,22 +1357,18 @@ function setTheme(t, btn) {
 
 // ── NAVIGATION ──
 function goPage(id, btn) {
-  // Esconde todas as páginas
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  // Mostra a página alvo
-  const page = document.getElementById('page-'+id);
-  if (!page) { console.error('page not found: page-'+id); return; }
-  page.classList.add('on');
-  // Scroll para o topo
-  // Scroll para mostrar a página abaixo do header fixo
-  const mc = document.getElementById('mainContent');
-  if (mc) mc.scrollIntoView({behavior: 'instant', block: 'start'});
-  window.scrollTo({top: 0, behavior: 'instant'});
-  // Marca botão ativo no sidebar
-  document.querySelectorAll('.sb-btn').forEach(b => {
-    b.classList.toggle('on', (b.getAttribute('onclick')||'').includes("'"+id+"'"));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  const page = $('page-'+id);
+  if (page) page.classList.add('on');
+  // mark all nav buttons for this page
+  document.querySelectorAll('.nb').forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+id+"'")) b.classList.add('on');
   });
-  // Carrega dados da página
+  // Sync sidebar active state
+  document.querySelectorAll('.sb-btn').forEach(b => {
+    b.classList.toggle('on', b.getAttribute('onclick')?.includes("'"+id+"'") || false);
+  });
   if (id==='chart')   initTV();
   if (id==='markets') { renderMkt1(); renderMkt2(); renderMkt3(); }
   if (id==='news')    loadNews();
@@ -1457,46 +1397,17 @@ async function fetchBRL() {
 const CG_IDS = 'bitcoin,ethereum,solana,ondo-finance,aave,pendle,ethena,tether,usd-coin,dai,first-digital-usd,paypal-usd,true-usd,gemini-dollar,binancecoin,ripple,cardano,dogecoin,chainlink,avalanche-2,polkadot,tron,shiba-inu,sui,aptos,pepe';
 let liveRates = {};
 
-// ── Helper: CoinGecko SEMPRE via proxy (CORS bloqueado do GitHub Pages) ──
-async function fetchCGUrl(url, timeout=12000) {
-  // corsproxy.io primeiro, depois allorigins como fallback
-  const proxies = [
-    `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  ];
-  for (const proxy of proxies) {
-    try {
-      const r = await fetch(proxy, {signal: AbortSignal.timeout(timeout)});
-      if (!r.ok) continue;
-      // allorigins encapsula o conteúdo em JSON
-      if (proxy.includes('allorigins')) {
-        const j = await r.json();
-        // Retorna um Response fake com o conteúdo extraído
-        return new Response(j.contents, {status:200, headers:{'Content-Type':'application/json'}});
-      }
-      return r;
-    } catch(e) { continue; }
-  }
-  throw new Error('fetchCGUrl: todos os proxies falharam para ' + url);
-}
-
 async function fetchCG() {
   try {
-    const cgBase = 'https://api.coingecko.com/api/v3';
-    const cgUrl = `${cgBase}/coins/markets?vs_currency=usd&ids=${CG_IDS}&order=market_cap_desc&price_change_percentage=24h,7d`;
-    // Tentar direto primeiro, fallback proxy se CORS bloquear
+    const cgUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${CG_IDS}&order=market_cap_desc&price_change_percentage=24h,7d`;
     let r;
-    try {
-      r = await fetch(cgUrl, {signal:AbortSignal.timeout(8000)});
-      if (!r.ok) throw new Error('status '+r.status);
-    } catch(_) {
-      r = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(cgUrl)}`, {signal:AbortSignal.timeout(12000)});
-    }
+    try { r = await fetch(cgUrl, {signal:AbortSignal.timeout(7000)}); if(!r.ok) throw new Error(); }
+    catch(_) { r = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(cgUrl)}`, {signal:AbortSignal.timeout(12000)}); }
     const arr = await r.json();
     arr.forEach(c => coinData[c.id] = c);
     updatePrices(); buildTicker(); buildHeatmap('24h'); buildWatchlist(); buildStables(); buildRet('monthly');
     renderMkt3(); renderMkt1(); renderMkt2(); updateWarBtcPrice();
-    buildTicker2(); buildLiqStats();
+    buildLiqStats();
   } catch(e) { console.warn('CG:', e); }
 }
 
@@ -1513,50 +1424,49 @@ async function fetchCG() {
 // ══════════════════════════════════════════════════════════════
 
 // ── TradingView Scanner symbols ──
-// ── Stooq symbols map for indices ──
-const STOOQ_SYMS = [
-  {s:'%5Espx',  k:'spx',    d:2},  // S&P 500
-  {s:'%5Endq',  k:'ndx',    d:2},  // NASDAQ Composite  
-  {s:'%5Edax',  k:'dax',    d:2},  // DAX
-  {s:'nky.i',   k:'nikkei', d:0},  // Nikkei 225 (índice stooq)
-  {s:'dxy.fx',  k:'dxy',    d:3},  // DXY
-];
+const TV_SYM_MAP = {
+  'SP:SPX':             {k:'spx',      d:2},
+  'NASDAQ:NDX':         {k:'ndx',      d:2},
+  'XETR:DAX':           {k:'dax',      d:2},
+  'TVC:NI225':          {k:'nikkei',   d:0},
+  'TVC:DXY':            {k:'dxy',      d:3},
+  'FX:EURUSD':          {k:'eurusd',   d:5},
+  'FX:USDBRL':          {k:'usdbrl',   d:4},
+  'TVC:UKOIL':          {k:'brent',    d:2},
+  'COMEX:GC1!':         {k:'gold_f',   d:2},
+  'COMEX:SI1!':         {k:'silver_f', d:3},
+  'CME:MES1!':          {k:'spx_f',    d:2},
+  'CME:NKD1!':          {k:'nikkei_f', d:0},
+  'BMFBOVESPA:WSP1!':   {k:'wsp',      d:2},
+  'SGX:NU1!':           {k:'nu1',      d:0},
+};
 
-// ── Fetch one stooq symbol via corsproxy.io ──
-async function fetchStooq(sym) {
-  const url = `https://stooq.com/q/l/?s=${sym}&f=sd2t2ohlcv&h&e=json`;
-  // Apenas corsproxy.io — allorigins dá 408 timeout no stooq
-  const proxies = [
-    `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  ];
-  for (const proxy of proxies) {
-    try {
-      const r = await fetch(proxy, {signal: AbortSignal.timeout(10000)});
-      if (!r.ok) continue;
-      const data = await r.json();
-      const q = data?.symbols?.[0];
-      if (q?.close && q.close > 0) return q;
-    } catch(e) { continue; }
-  }
-  return null;
-}
-
-// ── Indices fetch: Stooq via proxy (replaces blocked TV Scanner) ──
+// ── TradingView Scanner (indices, futures, FX) ──
 async function fetchTVScanner() {
-  try {
-    const jobs = STOOQ_SYMS.map(async ({s, k, d}) => {
-      const q = await fetchStooq(s);
-      if (!q) return;
-      const prev = q.open || q.close;
-      liveRates[k]         = q.close;
-      liveRates[k+'_chg']  = +(q.close - prev).toFixed(d);
-      liveRates[k+'_chgp'] = +((q.close - prev) / prev * 100).toFixed(2);
-      if (k === 'usdbrl') usdBrl = q.close;
-      console.log('Stooq OK:', k, q.close);
-    });
-    await Promise.allSettled(jobs);
-  } catch(e) { console.warn('fetchIndices:', e.message); }
+  const tickers = Object.keys(TV_SYM_MAP);
+  const body = JSON.stringify({
+    symbols: { tickers },
+    columns: ['close','change_abs','change']
+  });
+  const r = await fetch('https://scanner.tradingview.com/global/scan', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body,
+    signal: AbortSignal.timeout(10000)
+  });
+  const j = await r.json();
+  (j?.data || []).forEach(row => {
+    const meta = TV_SYM_MAP[row.s];
+    if (!meta) return;
+    const [price, chg, chgp] = row.d;
+    if (!price) return;
+    const k = meta.k;
+    liveRates[k]          = price;
+    liveRates[k+'_chg']   = chg  || 0;
+    liveRates[k+'_chgp']  = chgp || 0;
+    if (k === 'usdbrl') usdBrl = price;
+  });
+  console.log('TV Scanner OK');
 }
 
 // ── CoinGecko: ouro, prata, FX emergentes ──
@@ -1568,32 +1478,29 @@ async function fetchCGMetals() {
   // For real spot: use metals-api.com free tier (100 req/month) or metalpriceapi.com
   // Most reliable free source: frankfurter.app has no metals
   // Use: api.metals.live (no key, open source metals API)
-  // Primary: gold-api.com (free, no key, CORS open)
   try {
-    const [rGold, rSilver] = await Promise.all([
-      fetch('https://api.gold-api.com/price/XAU', {signal: AbortSignal.timeout(8000)}),
-      fetch('https://api.gold-api.com/price/XAG', {signal: AbortSignal.timeout(8000)}),
-    ]);
-    const gData = await rGold.json();
-    const sData = await rSilver.json();
-    if (gData?.price > 0) {
-      liveRates.gold      = gData.price;
-      liveRates.gold_chgp = gData.prev_close_price ? +((gData.price - gData.prev_close_price) / gData.prev_close_price * 100).toFixed(2) : 0;
-      liveRates.gold_chg  = gData.prev_close_price ? +(gData.price - gData.prev_close_price).toFixed(2) : 0;
+    const r = await fetch('https://api.metals.live/v1/spot', {
+      signal: AbortSignal.timeout(8000)
+    });
+    const metals = await r.json();
+    // Response: [{gold: 3315.50, silver: 32.85, platinum:..., palladium:...}]
+    if (Array.isArray(metals)) {
+      metals.forEach(m => {
+        if (m.gold   != null) { liveRates.gold   = m.gold;   }
+        if (m.silver != null) { liveRates.silver = m.silver; }
+      });
+    } else if (metals.gold) {
+      liveRates.gold   = metals.gold;
+      liveRates.silver = metals.silver;
     }
-    if (sData?.price > 0) {
-      liveRates.silver      = sData.price;
-      liveRates.silver_chgp = sData.prev_close_price ? +((sData.price - sData.prev_close_price) / sData.prev_close_price * 100).toFixed(2) : 0;
-      liveRates.silver_chg  = sData.prev_close_price ? +(sData.price - sData.prev_close_price).toFixed(3) : 0;
-    }
-    console.log('Gold-API.com OK — gold:', liveRates.gold, 'silver:', liveRates.silver);
-  } catch(e) { console.warn('gold-api.com failed:', e.message); }
+    console.log('Metals.live OK — gold:', liveRates.gold, 'silver:', liveRates.silver);
+  } catch(e) { console.warn('metals.live failed:', e.message); }
 
   // Fallback: CoinGecko PAXG (Paxos Gold token = 1 troy oz gold)
   if (!liveRates.gold) {
     try {
       const r = await fetch(
-        `https://corsproxy.io/?url=${encodeURIComponent('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold,tether-gold&vs_currencies=usd&include_24hr_change=true')}`,
+        'https://api.coingecko.com/api/v3/simple/price?ids=pax-gold,tether-gold&vs_currencies=usd&include_24hr_change=true',
         { signal: AbortSignal.timeout(8000) }
       );
       const g = await r.json();
@@ -1640,22 +1547,39 @@ async function fetchFXRates() {
 }
 
 // ── Main fetch orchestrator ──
-// ── SPX/NDX extra fallback (runs after main fetchTVScanner) ──
+// ── SPX from Stooq.com (reliable, no key, no CORS via allorigins) ──
 async function fetchSPXBinance() {
-  // SPX already handled by fetchTVScanner (stooq). Only run if still missing.
-  const missing = ['spx','ndx','dax','nikkei'].filter(k => !liveRates[k] || liveRates[k] <= 0);
-  if (!missing.length) return;
-  // Try stooq directly for any that failed
-  const map = {spx:'%5Espx', ndx:'%5Endq', dax:'%5Edax', nikkei:'%5En225'};
-  for (const k of missing) {
-    const q = await fetchStooq(map[k]).catch(() => null);
-    if (q?.close) {
+  if (liveRates.spx && liveRates.spx > 1000) return; // already have good value from TV
+  try {
+    // stooq.com provides real-time index data for free
+    const url = 'https://stooq.com/q/l/?s=%5Espx&f=sd2t2ohlcv&h&e=json';
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const r = await fetch(proxy, {signal: AbortSignal.timeout(10000)});
+    const raw = await r.json();
+    const data = JSON.parse(raw.contents);
+    const q = data?.symbols?.[0];
+    if (q?.close && q.close > 1000) {
       const prev = q.open || q.close;
-      liveRates[k]         = q.close;
-      liveRates[k+'_chg']  = +(q.close - prev).toFixed(2);
-      liveRates[k+'_chgp'] = +((q.close - prev) / prev * 100).toFixed(2);
-      console.log('SPX fallback OK:', k, q.close);
+      const chg  = q.close - prev;
+      const chgp = (chg / prev) * 100;
+      liveRates.spx      = q.close;
+      liveRates.spx_chg  = +chg.toFixed(2);
+      liveRates.spx_chgp = +chgp.toFixed(2);
+      console.log('SPX stooq.com OK:', q.close);
     }
+  } catch(e) {
+    // Final fallback: financialmodelingprep free (no key needed for SPX)
+    try {
+      const r2 = await fetch('https://financialmodelingprep.com/api/v3/quote/%5EGSPC?apikey=demo', {signal:AbortSignal.timeout(8000)});
+      const d2 = await r2.json();
+      const q = d2?.[0];
+      if (q?.price > 1000) {
+        liveRates.spx      = q.price;
+        liveRates.spx_chg  = q.change || 0;
+        liveRates.spx_chgp = q.changesPercentage || 0;
+        console.log('SPX FMP fallback OK:', q.price);
+      }
+    } catch(e2) { console.warn('SPX all sources failed'); }
   }
 }
 
@@ -1715,7 +1639,7 @@ function applyLiveRate(item) {
 
 async function fetchGlobal() {
   try {
-    const r = await fetchCGUrl('https://api.coingecko.com/api/v3/global');
+    const r = await fetch('https://api.coingecko.com/api/v3/global', {signal:AbortSignal.timeout(10000)});
     const {data} = await r.json();
     $('v_mcap').textContent = '$'+fB(data.total_market_cap.usd);
     $('v_vol').textContent = '$'+fB(data.total_volume.usd);
@@ -1741,14 +1665,7 @@ async function fetchGlobal() {
 
 async function fetchFG() {
   try {
-    const fgUrl = 'https://api.alternative.me/fng/?limit=2';
-    let r;
-    try {
-      r = await fetch(fgUrl, {signal:AbortSignal.timeout(6000)});
-      if (!r.ok) throw new Error('status '+r.status);
-    } catch(_) {
-      r = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(fgUrl)}`, {signal:AbortSignal.timeout(10000)});
-    }
+    const r = await fetch('https://api.alternative.me/fng/?limit=2', {signal:AbortSignal.timeout(8000)});
     const {data} = await r.json();
     const cur = data[0], prev = data[1];
     const val = +cur.value;
@@ -1789,32 +1706,39 @@ function updatePrices() {
 // ── TICKER ──
 function buildTicker() {
   const items = [
-    {s:'BTC/USD',  k:'bitcoin',  ik:'btc'},
-    {s:'ETH/USD',  k:'ethereum', ik:'eth'},
-    {s:'SOL/USD',  k:'solana',   ik:'sol'},
+    {s:'BTC/USD',  k:'bitcoin',     ik:'btc'},
+    {s:'ETH/USD',  k:'ethereum',    ik:'eth'},
+    {s:'SOL/USD',  k:'solana',      ik:'sol'},
     {s:'BNB/USD',  k:'binancecoin', ik:'bnb'},
-    {s:'XRP/USD',  k:'ripple',   ik:'xrp'},
-    {s:'ADA/USD',  k:'cardano',  ik:'ada'},
-    {s:'DOGE/USD', k:'dogecoin', ik:'doge'},
-    {s:'LINK/USD', k:'chainlink',ik:'link'},
+    {s:'XRP/USD',  k:'ripple',      ik:'xrp'},
+    {s:'ADA/USD',  k:'cardano',     ik:'ada'},
+    {s:'DOGE/USD', k:'dogecoin',    ik:'doge'},
+    {s:'LINK/USD', k:'chainlink',   ik:'link'},
     {s:'AVAX/USD', k:'avalanche-2', ik:'avax'},
-    {s:'BTC/BRL',  k:'bitcoin',  ik:'btcbrl', brl:true},
-    {s:'USD/BRL',  ik:'usdbrl',  live:'usdbrl', pfx:'R$ ', dec:4, ico:'🇧🇷'},
+    {s:'BTC/BRL',  k:'bitcoin',     ik:'btcbrl', brl:true},
+    {s:'USD/BRL',  ik:'usdbrl', static:usdBrl.toFixed(4), pfx:'R$ '},
+    {s:'S&P 500',  ik:'spx',   static: liveRates.spx ? liveRates.spx.toLocaleString('en-US',{maximumFractionDigits:2}) : '7,553', pfx:''},
+    {s:'NASDAQ',   ik:'ndx',   static: liveRates.ndx ? Math.round(liveRates.ndx).toLocaleString('en-US') : '26,854', pfx:''},
+    {s:'DAX',      ik:'dax',   static: liveRates.dax ? Math.round(liveRates.dax).toLocaleString('en-US') : '24,812', pfx:''},
+    {s:'NIKKEI',   ik:'nikkei',static: liveRates.nikkei ? Math.round(liveRates.nikkei).toLocaleString('en-US') : '35,600', pfx:''},
+    {s:'EUR/USD',  ik:'eurusd',static: liveRates.eurusd ? liveRates.eurusd.toFixed(4) : '1.1606', pfx:''},
+    {s:'GOLD',     ik:'gold',  static: liveRates.gold ? '$'+Math.round(liveRates.gold).toLocaleString('en-US') : '$4,486', pfx:''},
+    {s:'PRATA',    ik:'silver',static: liveRates.silver ? '$'+liveRates.silver.toFixed(2) : '$73.15', pfx:''},
+    {s:'BRENT',    ik:'oil',   static: liveRates.brent ? '$'+liveRates.brent.toFixed(2) : '$79.50', pfx:''},
+    {s:'DXY',      ik:'dxy',   static: liveRates.dxy ? liveRates.dxy.toFixed(2) : '98.48', pfx:''},
   ];
   let h = '';
   items.forEach(p => {
     let px='—', cls='nu', pct='';
-    if (p.live && liveRates[p.live]) { px = (p.pfx||'')+liveRates[p.live].toFixed(p.dec||2); cls='nu'; }
+    if (p.static) { px = (p.pfx||'')+p.static; cls='nu'; }
     else if (p.k && coinData[p.k]) {
       const c = coinData[p.k];
       px = p.brl ? 'R$ '+fmt(c.current_price*usdBrl,0) : (c.current_price>100?fUSD(c.current_price,0):fUSD(c.current_price,4));
       cls = c.price_change_percentage_24h>=0?'up':'dn';
       pct = fPct(c.price_change_percentage_24h);
     }
-    const icoSrc = IC[p.ik] || (p.k && coinData[p.k]?.image) || '';
-    const icoHtml = icoSrc
-      ? `<img src="${icoSrc}" style="width:14px;height:14px;border-radius:50%;object-fit:cover;vertical-align:middle;flex-shrink:0" onerror="this.style.display='none'">`
-      : (p.ico ? `<span style="font-size:11px">${p.ico}</span>` : '');
+    const icoSrc = IC[p.ik]||'';
+    const icoHtml = icoSrc ? `<img src="${icoSrc}" style="width:14px;height:14px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,.1)">` : '';
     h += `<div class="tki">${icoHtml}<span class="tks">${p.s}</span><span class="tkp">${px}</span>${pct?`<span class="${cls}">${pct}</span>`:''}</div>`;
   });
   $('tkW').innerHTML = h+h;
@@ -1869,7 +1793,7 @@ function buildHeatmap(mode) {
 // ── TRENDING ──
 async function fetchTrending() {
   try {
-    const r = await fetchCGUrl('https://api.coingecko.com/api/v3/search/trending');
+    const r = await fetch('https://api.coingecko.com/api/v3/search/trending', {signal:AbortSignal.timeout(10000)});
     const {coins} = await r.json();
     const tb = $('trendTb'); tb.innerHTML='';
     coins.slice(0,7).forEach((c, i) => {
@@ -1911,7 +1835,7 @@ const WL = [
   {s:'NU1!',   n:'Nikkei 225 Fut.',  ik:'nikkei',  tv:'https://br.tradingview.com/symbols/SGX-NU1!/',           t:'Futuro JP',mock:{p:'35,500',c:'-120',cp:'-0.34%',pos:false}},
 ];
 function buildWatchlist() {
-  const tb = $('wlTb'); if (!tb) return; tb.innerHTML='';
+  const tb = $('wlTb'); if(!tb) return; tb.innerHTML='';
   WL.forEach(item => {
     let px='—', chg='—', chgp='—', pos=true;
     if (item.k && coinData[item.k]) {
@@ -1987,190 +1911,62 @@ const RET = {
   monthly:{
     months:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
     btc:{
-      '2026':[-10.17,-14.94,1.81,11.87,-3.41,-8.87,null,null,null,null,null,null],
-      '2025':[9.29,-17.39,-2.3,14.08,10.99,2.49,8.13,-6.49,5.16,-3.69,-17.67,-2.97],
-      '2024':[0.62,43.55,16.81,-14.76,11.07,-6.96,2.95,-8.6,7.29,10.76,37.29,-2.85],
-      '2023':[39.63,0.03,22.96,2.81,-6.98,11.98,-4.02,-11.29,3.91,28.52,8.81,12.18],
-      '2022':[-16.68,12.21,5.39,-17.3,-15.6,-37.28,16.8,-13.88,-3.12,5.56,-16.23,-3.59],
+      '2026':[9.4,-17.8,-4.8,-14.2,12.8,null,null,null,null,null,null,null],
+      '2025':[9.1,-17.4,-2.0,-14.5,14.1,2.4,-3.2,8.5,-6.1,11.3,-2.1,4.2],
+      '2024':[0,-3.1,15.5,-14.9,11,-7.2,-2.9,-8.8,7.8,10.7,37.3,12.1],
+      '2023':[39.6,0,22.7,3,-7.7,12,3.5,-11.3,-4.5,27.6,9,12.5],
+      '2022':[-16.7,12.8,5.5,-17.3,-15.6,-37.3,16.8,-13.9,-3.1,5.4,-16.7,-3.3],
     },
     eth:{
-      '2026':[-17.52,-19.81,6.97,7.3,-11.07,-4.92,null,null,null,null,null,null],
-      '2025':[-1.28,-31.95,-18.69,-1.56,40.84,-1.49,48.77,18.78,-5.71,-7.02,-22.38,-0.65],
-      '2024':[-0.13,46.28,9.33,-17.29,24.65,-8.68,-5.88,-22.21,3.56,-3.4,47.21,-9.75],
-      '2023':[32.44,1.26,13.46,2.71,0.16,3.29,-3.99,-11.3,1.46,8.69,13.01,11.31],
-      '2022':[-26.89,8.78,12.2,-16.88,-28.84,-44.79,56.62,-7.33,-14.49,18.39,-17.67,-7.6],
+      '2026':[-14.2,-21.7,-24.6,-30.1,18.4,null,null,null,null,null,null,null],
+      '2025':[-10.9,-32.1,-17.8,-24.6,61.2,-8.1,-5.3,12.2,-9.4,7.8,-3.3,2.8],
+      '2024':[-5.4,-4.5,8.3,-19.5,24.9,-10.2,8.3,-22.4,8.0,4.8,47.0,6.8],
+      '2023':[32.5,-1.2,14.8,6.9,-5.9,3.9,6.0,-11.8,-12.5,17.3,13.4,9.7],
+      '2022':[-26.5,9.6,-13.9,-30.1,-45.3,-35.9,57.3,-25.6,7.8,14.6,-22.7,-13.8],
     },
   },
   quarterly:{
     months:['Q1','Q2','Q3','Q4'],
     btc:{
-      // Q1=Jan+Fev+Mar composto, Q2=Abr+Mai+Jun
-      '2026':[-22.29,-0.89,null,null],
-      '2025':[-10.9,29.34,-5.27,-24.51],
-      '2024':[62.35,-11.16,0.97,47.83],
-      '2023':[72.58,6.36,-11.97,54.39],
-      '2022':[0.05,-56.29,-1.24,-14.73],
+      '2026':[-9.5,null,null,null],
+      '2025':[-10.4,1.0,-1.1,21.5],
+      '2024':[11.1,-8.4,-3.9,62.8],
+      '2023':[72.3,-6.8,-9.3,58.1],
+      '2022':[1.7,-56.8,-0.2,-15.9],
     },
     eth:{
-      '2026':[-29.18,-8.33,null,null],
-      '2025':[-47.35,37.44,57.57,-23.35],
-      '2024':[58.31,-3.41,-24.24,30.11],
-      '2023':[50.62,6.22,-21.16,36.92],
-      '2022':[-19.81,-71.82,28.09,-10.29],
+      '2026':[-33.1,null,null,null],
+      '2025':[-52.1,18.0,-2.5,7.1],
+      '2024':[-14.0,1.5,-15.8,60.2],
+      '2023':[51.4,-4.0,-20.0,35.5],
+      '2022':[-46.1,-66.1,25.3,-29.1],
     },
   }
 };
-// ── Retornos históricos em tempo real (CoinGecko market_chart) ──
-let _retLoaded = false;
-async function fetchRetornos() {
-  try {
-    // CoinGecko free: /market_chart?days=max retorna granularidade automática
-    // Para calcular mensais precisamos de dados diários — days=2200 cobre 2019-2026
-    const COINS = ['bitcoin','ethereum'];
-    const results = {};
-
-    for (const coin of COINS) {
-      try {
-        // CoinGecko free tier: max 365 dias sem API key
-      const url = `https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=usd&days=365&interval=daily`;
-        const r = await fetchCGUrl(url, 25000);
-        const data = await r.json();
-        if (!data.prices || data.prices.length < 30) continue;
-
-        // data.prices = [[timestamp_ms, price], ...]
-        // Agrupar por mês e calcular retorno = (último - primeiro) / primeiro * 100
-        const byMonth = {}; // key: "2026-05" → [prices]
-        for (const [ts, price] of data.prices) {
-          const d = new Date(ts);
-          const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;
-          if (!byMonth[key]) byMonth[key] = [];
-          byMonth[key].push(price);
-        }
-
-        const monthly = {};
-        for (const [key, prices] of Object.entries(byMonth)) {
-          if (prices.length < 2) continue;
-          const open  = prices[0];
-          const close = prices[prices.length - 1];
-          monthly[key] = +((close - open) / open * 100).toFixed(2);
-        }
-        results[coin] = monthly;
-      } catch(e) { console.warn('fetchRetornos', coin, e.message); }
-    }
-
-    if (!results.bitcoin && !results.ethereum) return; // ambos falharam, manter estático
-
-    // Montar arrays mensais por ano para RET
-    const years = ['2026','2025','2024','2023','2022','2021','2020','2019'];
-    const monthNums = [1,2,3,4,5,6,7,8,9,10,11,12];
-    const now = new Date();
-    const curYear = now.getUTCFullYear();
-    const curMonth = now.getUTCMonth() + 1; // 1-12
-
-    function buildYearArr(coinData, year) {
-      return monthNums.map(m => {
-        // Mês atual em andamento: mostrar valor provisório com indicador
-        const yInt = parseInt(year);
-        if (yInt === curYear && m === curMonth) {
-          // Mês atual: retorno parcial (início do mês até hoje)
-          const key = `${year}-${String(m).padStart(2,'0')}`;
-          return coinData?.[key] ?? null;
-        }
-        // Mês futuro
-        if (yInt > curYear || (yInt === curYear && m > curMonth)) return null;
-        const key = `${year}-${String(m).padStart(2,'0')}`;
-        return coinData?.[key] ?? null;
-      });
-    }
-
-    // Atualizar RET.monthly com dados reais
-    if (results.bitcoin) {
-      years.forEach(yr => {
-        const arr = buildYearArr(results.bitcoin, yr);
-        if (arr.some(v => v !== null)) RET.monthly.btc[yr] = arr;
-      });
-    }
-    if (results.ethereum) {
-      years.forEach(yr => {
-        const arr = buildYearArr(results.ethereum, yr);
-        if (arr.some(v => v !== null)) RET.monthly.eth[yr] = arr;
-      });
-    }
-
-    // Recalcular quarterly a partir dos mensais atualizados
-    function calcQ(monthArr) {
-      // Q composto: ((1+m1/100)*(1+m2/100)*(1+m3/100)-1)*100
-      const q = [];
-      for (let qi = 0; qi < 4; qi++) {
-        const ms = monthArr.slice(qi*3, qi*3+3);
-        if (ms.every(v => v === null)) { q.push(null); continue; }
-        const validMs = ms.filter(v => v !== null);
-        if (validMs.length === 0) { q.push(null); continue; }
-        let compound = 1;
-        validMs.forEach(v => compound *= (1 + v/100));
-        q.push(+((compound - 1) * 100).toFixed(2));
-      }
-      return q;
-    }
-    years.forEach(yr => {
-      if (RET.monthly.btc[yr]) RET.quarterly.btc[yr] = calcQ(RET.monthly.btc[yr]);
-      if (RET.monthly.eth[yr]) RET.quarterly.eth[yr] = calcQ(RET.monthly.eth[yr]);
-    });
-
-    _retLoaded = true;
-    console.log('Retornos atualizados via CoinGecko — BTC meses:', Object.keys(results.bitcoin||{}).length);
-
-    // Re-renderizar tabela com dados atualizados
-    // Expandir lista de anos para incluir tudo disponível
-    buildRet('monthly');
-
-  } catch(e) { console.warn('fetchRetornos geral:', e.message); }
-}
-
 function setRet(m, btn) {
   btn.closest('.pills').querySelectorAll('.pill').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on'); buildRet(m);
 }
 function buildRet(mode) {
-  const d = RET[mode];
-  // Anos dinâmicos: todos que tiverem dados, do mais recente ao mais antigo
-  const allYears = Object.keys(d.btc).sort((a,b)=>b-a);
-  const years = allYears.length ? allYears : ['2026','2025','2024','2023','2022'];
-  const now = new Date();
-  const curYearStr = String(now.getUTCFullYear());
-  const curMonthIdx = now.getUTCMonth(); // 0-based
+  const d = RET[mode], years = ['2026','2025','2024','2023','2022'];
   const rC = v => v>15?'rgba(4,120,87,.55)':v>5?'rgba(5,150,105,.45)':v>0?'rgba(16,185,129,.3)':v>-5?'rgba(220,38,38,.3)':v>-15?'rgba(185,28,28,.45)':'rgba(127,29,29,.55)';
   const btcIco = IC.btc ? `<img src="${IC.btc}" style="width:13px;height:13px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,.1);padding:1px">` : '';
   const ethIco = IC.eth ? `<img src="${IC.eth}" style="width:13px;height:13px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,.1);padding:1px">` : '';
-  const retTs = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  const retSrc = _retLoaded ? `<span style="color:var(--G);font-size:10px">⬤ ao vivo · atualizado ${retTs}</span>` : `<span style="color:var(--muted);font-size:10px">⬤ Coinglass (estático)</span>`;
-  let h = `<div style="min-width:600px"><div style="display:flex;justify-content:flex-end;padding:2px 4px 6px;gap:8px;align-items:center">${retSrc}</div><table style="width:100%;border-collapse:collapse;font-size:12px">
+  let h = `<div style="min-width:600px"><table style="width:100%;border-collapse:collapse;font-size:12px">
   <thead><tr style="border-bottom:2px solid var(--b2)">
     <th style="padding:5px 8px;text-align:left;color:#4aaa80;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;width:45px">ANO</th>
     <th style="padding:5px 6px;color:#4aaa80;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;width:48px">ATIVO</th>
     ${d.months.map(m=>`<th style="padding:5px 3px;color:#4aaa80;font-size:9.5px;font-weight:700;text-transform:uppercase;text-align:center;min-width:44px">${m}</th>`).join('')}
   </tr></thead><tbody>`;
-  const isMonthly = mode === 'monthly';
   years.forEach(yr => {
     const bArr = d.btc[yr]||[], eArr = d.eth[yr]||[];
-    // Função que renderiza célula com indicador ao vivo para mês atual
-    const cell = (v, idx, borderStyle) => {
-      const isLive = isMonthly && yr === curYearStr && idx === curMonthIdx && v !== null;
-      const isFuture = isMonthly && (parseInt(yr) > parseInt(curYearStr) || (yr === curYearStr && idx > curMonthIdx));
-      if (isFuture || v === null) {
-        return `<td style="padding:0;${borderStyle}"><div class="ret-cell" style="background:rgba(255,255,255,.02);color:var(--muted);font-size:9px">${isFuture?'':'—'}</div></td>`;
-      }
-      const liveStyle = isLive ? 'outline:1px solid var(--G);' : '';
-      const liveTag   = isLive ? '<span style="font-size:7px;line-height:1;display:block;color:var(--G);letter-spacing:.3px">▶MTD</span>' : '';
-      return `<td style="padding:0;${borderStyle}"><div class="ret-cell" style="background:${rC(v)};${liveStyle}">${v>0?'+':''}${v.toFixed(1)}%${liveTag}</div></td>`;
-    };
     h += `<tr>
       <td rowspan="2" style="padding:5px 8px;font-weight:800;font-size:13px;color:var(--muted);vertical-align:middle;border-right:1px solid var(--b1)">${yr}</td>
       <td style="padding:5px 6px;border-bottom:1px solid var(--b1)"><div style="display:flex;align-items:center;gap:4px;white-space:nowrap">${btcIco}<span style="color:#f7931a;font-weight:800">BTC</span></div></td>`;
-    bArr.forEach((v,i) => { h += cell(v, i, 'border-bottom:1px solid var(--b1)'); });
+    bArr.forEach(v => { h += v==null ? `<td style="padding:0;border-bottom:1px solid var(--b1)"><div class="ret-cell" style="background:rgba(255,255,255,.04);color:var(--muted)">—</div></td>` : `<td style="padding:0;border-bottom:1px solid var(--b1)"><div class="ret-cell" style="background:${rC(v)}">${v>0?'+':''}${v.toFixed(1)}%</div></td>`; });
     h += `</tr><tr>
       <td style="padding:5px 6px;border-bottom:2px solid var(--b2)"><div style="display:flex;align-items:center;gap:4px;white-space:nowrap">${ethIco}<span style="color:#627eea;font-weight:800">ETH</span></div></td>`;
-    eArr.forEach((v,i) => { h += cell(v, i, 'border-bottom:2px solid var(--b2)'); });
+    eArr.forEach(v => { h += v==null ? `<td style="padding:0;border-bottom:2px solid var(--b2)"><div class="ret-cell" style="background:rgba(255,255,255,.04);color:var(--muted)">—</div></td>` : `<td style="padding:0;border-bottom:2px solid var(--b2)"><div class="ret-cell" style="background:${rC(v)}">${v>0?'+':''}${v.toFixed(1)}%</div></td>`; });
     h += '</tr>';
   });
   h += '</tbody></table></div>';
@@ -2217,7 +2013,6 @@ function toggleMACfg(btn) {
 
 // ── RSI DISPLAY ──
 let rsiHistChart = null, lastRSI = 55;
-let liqChart = null;
 function setRsiDisplay(val) {
   lastRSI = val;
   const rsiN   = $('rsiNum'),  rsiBdg = $('rsiBadge');
@@ -2350,7 +2145,7 @@ async function fetchRealRSI_CG(tf) {
   try {
     const days = tf==='1M'?'max':tf==='1w'?'365':'90';
     const r = await fetch(
-      `https://corsproxy.io/?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=${days}`)}`,
+      `https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=${days}`,
       {signal:AbortSignal.timeout(10000)}
     );
     const ohlc = await r.json();
@@ -2470,28 +2265,11 @@ function isWithin24h(dateStr) {
 }
 
 async function fetchRSS(url, timeout = 12000) {
-  // Try multiple CORS proxies in order
-  const proxies = [
-    { url: `https://corsproxy.io/?url=${encodeURIComponent(url)}`, type: 'direct' },
-    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'allorigins' },
-    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'direct' },
-  ];
-  for (const proxy of proxies) {
-    try {
-      const r = await fetch(proxy.url, { signal: AbortSignal.timeout(timeout) });
-      if (!r.ok) continue;
-      let xmlText;
-      if (proxy.type === 'allorigins') {
-        const j = await r.json();
-        xmlText = j.contents;
-      } else {
-        xmlText = await r.text();
-      }
-      if (!xmlText || xmlText.length < 100) continue;
-      return parseRSS(xmlText);
-    } catch(e) { /* try next */ }
-  }
-  throw new Error('all RSS proxies failed for: ' + url);
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const r = await fetch(proxy, { signal: AbortSignal.timeout(timeout) });
+  const j = await r.json();
+  if (!j.contents) throw new Error('empty response from proxy');
+  return parseRSS(j.contents);
 }
 
 function renderNewsItems(items, container, opts = {}) {
@@ -2531,14 +2309,14 @@ function renderNewsItems(items, container, opts = {}) {
 // ════════════════════════════════════════════════════════════════
 
 const AI_FEEDS_CFG = [
-  { url:'https://venturebeat.com/category/ai/feed/',
+  { url:'https://feeds.feedburner.com/venturebeat/SZYF',
     name:'VentureBeat AI', fid:'aiF1', ts:'aiTs1' },
-  { url:'https://techcrunch.com/category/artificial-intelligence/feed/',
-    name:'TechCrunch AI', fid:'aiF2', ts:'aiTs2' },
   { url:'https://www.technologyreview.com/feed/',
-    name:'MIT Tech Review', fid:'aiF3', ts:'aiTs3' },
-  { url:'https://feeds.arstechnica.com/arstechnica/index',
-    name:'Ars Technica', fid:'aiF4', ts:'aiTs4' },
+    name:'MIT Tech Review', fid:'aiF2', ts:'aiTs2' },
+  { url:'https://techcrunch.com/tag/artificial-intelligence/feed/',
+    name:'TechCrunch AI', fid:'aiF3', ts:'aiTs3' },
+  { url:'https://www.theverge.com/ai-artificial-intelligence/rss/index.xml',
+    name:'The Verge AI', fid:'aiF4', ts:'aiTs4' },
 ];
 
 const AI_KEYS = ['openai','chatgpt','gpt','gemini','claude','llm','agi',
@@ -2622,7 +2400,7 @@ const WAR_FEEDS = [
   // Feed combinado principal (NYT World)
   'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
   // Reuters World
-  'https://feeds.bbci.co.uk/news/world/rss.xml',
+  'https://feeds.reuters.com/reuters/worldNews',
   // BBC World
   'https://feeds.bbci.co.uk/news/world/rss.xml',
   // Al Jazeera (conflitos)
@@ -2823,13 +2601,13 @@ function renderMkt3() {
 // ── NEWS ──
 const NEWS_FEEDS = {
   crypto: ['https://cointelegraph.com/rss','https://decrypt.co/feed'],
-  ai:     ['https://venturebeat.com/category/ai/feed/','https://techcrunch.com/category/artificial-intelligence/feed/'],
+  ai:     ['https://feeds.feedburner.com/venturebeat/SZYF','https://www.technologyreview.com/feed/'],
   tech:   ['https://techcrunch.com/feed/','https://www.wired.com/feed/rss'],
   war:    ['https://rss.nytimes.com/services/xml/rss/nyt/World.xml','https://feeds.bbci.co.uk/news/world/rss.xml']
 };
 const NEWS_HEADS = {
   crypto:['Últimas Crypto','Decrypt Feed'],
-  ai:['VentureBeat AI','TechCrunch AI'],
+  ai:['IA — VentureBeat','IA — MIT Tech Review'],
   tech:['TechCrunch','Wired'],
   war:['NYT World','BBC World']
 };
@@ -2851,14 +2629,12 @@ async function loadFeed(id, url) {
     // Try fastest proxy first
     let xmlText = null;
     const proxies = [
-      `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
       `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      `https://corsproxy.io/?${encodeURIComponent(url)}`
     ];
     for(const proxy of proxies){
       try{
-        const r=await fetch(proxy,{signal:AbortSignal.timeout(10000)});
-        if(!r.ok) continue;
+        const r=await fetch(proxy,{signal:AbortSignal.timeout(9000)});
         if(proxy.includes('allorigins')){const d=await r.json();xmlText=d.contents;}
         else{xmlText=await r.text();}
         if(xmlText&&xmlText.includes('<item'))break;
@@ -3320,6 +3096,8 @@ function renderWarTimeline() {
   tl.innerHTML = `<div style="position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--R),var(--Y),var(--B));border-radius:2px;opacity:.4"></div>` + (inner || '<div style="text-align:center;padding:20px;color:var(--muted)">Nenhum evento nesta categoria</div>');
 }
 
+
+
 function updateWarBtcPrice() {
   const el = document.getElementById('war_btc_px');
   if (el && coinData['bitcoin']) {
@@ -3345,8 +3123,6 @@ async function init() {
     buildRet('monthly');
     renderMkt1(); renderMkt2(); renderMkt3();
     buildTicker();
-    buildTicker2();
-    buildLiqStats();
   });
   buildEtfCharts();
   renderPoly();
@@ -3360,10 +3136,8 @@ async function init() {
   setTimeout(fetchAllRSI5, 2000);
   setInterval(fetchAllRSI5, 90000);
   setInterval(buildLiqStats, 30000);
-  // Retornos históricos ao vivo (delay 5s para não competir com dados principais)
   setTimeout(fetchRetornos, 5000);
-  // Refresh a cada 6 horas (retornos mensais mudam lentamente, mas mês atual muda)
-  setInterval(fetchRetornos, 6 * 60 * 60 * 1000);
+  setInterval(fetchRetornos, 6*60*60*1000);
   _iaInit();
 }
 document.addEventListener('DOMContentLoaded', init);
@@ -3383,41 +3157,35 @@ var _t100Loaded   = false, _t100Data = [], _t100Filter = 'all';
 var _ocLoaded     = false, _ocData  = {};
 
 // ── Sidebar collapse ──
-// ── Sidebar collapse ──
 function toggleSB() {
   _sbCollapsed = !_sbCollapsed;
   var sb = document.getElementById('sidebar');
-  var mc = document.getElementById('mainContent');
   var ic = document.getElementById('sbIco');
   if (sb) sb.classList.toggle('collapsed', _sbCollapsed);
-  // flex layout: sidebar.collapsed reduz width, mainContent(flex:1) expande automaticamente
-  if (ic) ic.className = _sbCollapsed ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left';
+  if (ic) ic.className = _sbCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-bars';
   try { localStorage.setItem('_sbC', _sbCollapsed ? '1' : '0'); } catch(e){}
 }
 (function(){
-  try { if(localStorage.getItem('_sbC')==='1') { _sbCollapsed=true; var sb=document.getElementById('sidebar'); if(sb)sb.classList.add('collapsed'); var ic=document.getElementById('sbIco'); if(ic)ic.className='fa-solid fa-angles-right'; } }catch(e){}
+  try { if(localStorage.getItem('_sbC')==='1') { _sbCollapsed=true; var sb=document.getElementById('sidebar'); if(sb)sb.classList.add('collapsed'); var ic=document.getElementById('sbIco'); if(ic)ic.className='fa-solid fa-chevron-right'; } }catch(e){}
 })();
 
 // ── Ticker row 2 (markets) ──
 function buildTicker2() {
   var el = document.getElementById('tkW2'); if (!el) return;
   var items = [
-    {s:'S&P 500', v:liveRates.spx,    dec:2, fb:'7,553',  chgKey:'spx_chgp',    ico:'🇺🇸'},
-    {s:'NASDAQ',  v:liveRates.ndx,    dec:0, fb:'26,854', chgKey:'ndx_chgp',    ico:'📊'},
-    {s:'DAX',     v:liveRates.dax,    dec:0, fb:'24,812', chgKey:'dax_chgp',    ico:'🇩🇪'},
-    {s:'NIKKEI',  v:liveRates.nikkei, dec:0, fb:'35,600', chgKey:'nikkei_chgp', ico:'🇯🇵'},
-    {s:'EUR/USD', v:liveRates.eurusd, dec:4, fb:'1.1163',                        ico:'🇪🇺'},
-    {s:'USD/BRL', v:liveRates.usdbrl, dec:4, fb:'5.019',                         ico:'🇧🇷'},
-    {s:'GOLD',    v:liveRates.gold,   dec:0, fb:'4,436',  p:'$', chgKey:'gold_chgp',   ico:'🥇'},
-    {s:'PRATA',   v:liveRates.silver, dec:2, fb:'72.87',  p:'$', chgKey:'silver_chgp', ico:'🥈'},
-    {s:'BRENT',   v:liveRates.brent,  dec:2, fb:'79.50',  p:'$',                 ico:'🛢️'},
-    {s:'DXY',     v:liveRates.dxy,    dec:3, fb:'98.48',  chgKey:'dxy_chgp',    ico:'💵'},
+    {s:'S&P 500', v:liveRates.spx,    dec:2, fb:'6,881'},
+    {s:'NASDAQ',  v:liveRates.ndx,    dec:0, fb:'24,992'},
+    {s:'DAX',     v:liveRates.dax,    dec:0, fb:'23,500'},
+    {s:'NIKKEI',  v:liveRates.nikkei, dec:0, fb:'35,600'},
+    {s:'EUR/USD', v:liveRates.eurusd, dec:4, fb:'1.1165'},
+    {s:'USD/BRL', v:liveRates.usdbrl, dec:4, fb:'5.05'},
+    {s:'GOLD',    v:liveRates.gold,   dec:0, fb:'3,349', p:'$'},
+    {s:'PRATA',   v:liveRates.silver, dec:2, fb:'33.10', p:'$'},
+    {s:'DXY',     v:liveRates.dxy,    dec:3, fb:'98.48'},
   ];
   var h = items.map(function(m){
     var px = m.v ? (m.p||'')+(+m.v).toLocaleString('en-US',{minimumFractionDigits:m.dec,maximumFractionDigits:m.dec}) : (m.p||'')+m.fb;
-    var pctHtml = (m.chgKey && liveRates[m.chgKey]) ? '<span class="'+(liveRates[m.chgKey]>=0?'up':'dn')+'" style="font-size:11px">'+(liveRates[m.chgKey]>0?'+':'')+liveRates[m.chgKey].toFixed(2)+'%</span>' : '';
-    var icoHtml = m.ico ? '<span style="font-size:12px;line-height:1;flex-shrink:0">'+m.ico+'</span>' : '';
-    return '<div class="tki">'+icoHtml+'<span class="tks">'+m.s+'</span><span class="tkp">'+px+'</span>'+pctHtml+'</div>';
+    return '<div class="tki"><span class="tks">'+m.s+'</span><span class="tkp">'+px+'</span></div>';
   }).join('');
   el.innerHTML = h + h;
 }
@@ -3481,6 +3249,10 @@ function buildLiqStats() {
   el=$('v_liqTS'); if(el) el.textContent=tS.toLocaleString()+' shorts';
 }
 
+// fetchCG já tem buildTicker2/buildLiqStats merged
+
+// goPage já tem warnews/top100/onchain merged
+
 // ── War News page ──
 var _wnFeeds = [
   'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
@@ -3502,26 +3274,14 @@ function _wnTag(t){
 async function loadWN(force) {
   if (_wnLoaded && !force) { _renderWN(); return; }
   _wnLoaded = true; _wnItems = [];
+  var proxyBase = 'https://api.allorigins.win/get?url=';
   var feeds = ['wnF1','wnF2','wnF3','wnF4'];
   var jobs = _wnFeeds.map(function(url, idx) {
     return (async function(){
       try {
-        var xmlText = '';
-        var proxies = [
-          'https://corsproxy.io/?url=' + encodeURIComponent(url),
-          'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
-          'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
-        ];
-        for (var pi = 0; pi < proxies.length; pi++) {
-          try {
-            var pr = await fetch(proxies[pi], {signal: AbortSignal.timeout(10000)});
-            if (!pr.ok) continue;
-            if (proxies[pi].includes('allorigins')) { var pj = await pr.json(); xmlText = pj.contents||''; }
-            else { xmlText = await pr.text(); }
-            if (xmlText.length > 100) break;
-          } catch(pe) { continue; }
-        }
-        var doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+        var r = await fetch(proxyBase + encodeURIComponent(url));
+        var j = await r.json();
+        var doc = new DOMParser().parseFromString(j.contents||'', 'text/xml');
         var items = Array.from(doc.querySelectorAll('item')).slice(0,10).map(function(el){
           var title = el.querySelector('title')?.textContent?.trim()||'';
           var link  = el.querySelector('link')?.textContent?.trim()||'#';
@@ -3579,7 +3339,7 @@ async function loadT100(force) {
   if (tb) tb.innerHTML='<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)"><i class="fa-solid fa-circle-notch fa-spin"></i> Carregando...</td></tr>';
   _t100Data = [];
   try {
-    var r = await fetchCGUrl('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=80&page=1&price_change_percentage=24h');
+    var r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=80&page=1&price_change_percentage=24h');
     var cryptos = await r.json();
     cryptos.forEach(function(c,idx){
       _t100Data.push({rank:idx+1,name:c.name,sym:c.symbol.toUpperCase(),price:c.current_price,
@@ -3711,8 +3471,11 @@ async function _iaAsk(q) {
   }
 }
 
-</script>
+// init já tem fetchAllRSI5/buildLiqStats/_iaInit merged
 
+</script>
+</div><!-- mainContent -->
+</div><!-- appWrap -->
 
 <div id="iaChatPanel" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9998;width:360px;max-height:520px;background:var(--card2);border:1px solid var(--b2);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.9);flex-direction:column;overflow:hidden">
   <div style="padding:12px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:9px;flex-shrink:0">
@@ -3736,7 +3499,6 @@ async function _iaAsk(q) {
     </div>
   </div>
 </div>
-</body>
-</html>
+<button id="iaFloatBtn" onclick="var p=document.getElementById('iaChatPanel');p.style.display=p.style.display==='flex'?'none':'flex'" style="position:fixed;bottom:20px;right:20px;z-index:9997;width:52px;height:52px;border-radius:50%;border:2px solid var(--G);background:rgba(0,255,136,.15);cursor:pointer;font-size:22px;box-shadow:0 0 20px rgba(0,255,136,.3);display:flex;align-items:center;justify-content:center" title="Assistente IA">🤖</button>
 </body>
 </html>
